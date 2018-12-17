@@ -5,27 +5,40 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PDFGenerator.Configuration;
 using PDFGenerator.Services;
 using PDFGenerator.Services.Interfaces;
 using PDFGenerator.Utilities;
 
 namespace PDFGenerator
 {
+    /// <summary>
+    /// Startup class
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="configuration">Configuration</param>
+        /// <param name="environment">HostingEnvironment</param>
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
             HostingEnvironment = environment;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         private IHostingEnvironment HostingEnvironment { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
@@ -56,6 +69,18 @@ namespace PDFGenerator
                 options.DefaultApiVersion = new ApiVersion(1, 0);
             });
 
+            services.AddSwaggerGen(
+                options =>
+                {
+                    var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerDoc(description.GroupName, Program.CreateInfoForApiVersion(description));
+                    }
+                    options.OperationFilter<SwaggerDefaultValues>();
+                    options.IncludeXmlComments($"{Program.WorkingDirectory}/PDFGenerator.xml", true);
+                });
+
             services.AddTransient<IPdfService, PdfService>();
 
             var context = new CustomAssemblyLoadContext();
@@ -64,8 +89,13 @@ namespace PDFGenerator
             
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">ApplicationBuilder</param>
+        /// <param name="env">HostingEnvironment</param>
+        /// <param name="provider">Instance of the API Versioning configuration</param>
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -86,6 +116,17 @@ namespace PDFGenerator
                 await next();
             });
 
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                options =>
+                {
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                    }
+                });
+
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

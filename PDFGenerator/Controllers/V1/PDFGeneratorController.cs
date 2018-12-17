@@ -30,15 +30,18 @@ namespace PDFGenerator.Controllers.V1
         /// <summary>
         /// Create a PDF from a URL
         /// </summary>
-        /// <param name="pageUrl">The URL of the page</param>
+        /// <param name="page">The URL of the page</param>
         /// <returns>A PDF of the HTML page located at the URL</returns>
-        [HttpGet]
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         [Route("PDFFromURL")]
-        public ActionResult CreatePdfFromUrl()
+        public ActionResult CreatePdfFromUrl([FromBody]UrlDTO page)
         {
             try
             {
-                var pdf = PdfService.ConvertUrlToHtmlToPdfDocument(new UrlDTO(){Url = "https://www.google.com"});
+                var pdf = PdfService.ConvertUrlToHtmlToPdfDocument(page);
  
                 return File(pdf, "application/pdf");
             }

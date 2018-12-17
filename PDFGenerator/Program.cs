@@ -1,12 +1,24 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace PDFGenerator
 {
+    /// <summary>
+    /// Program class
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// Working directory the application launched from
+        /// </summary>
+        public static string WorkingDirectory => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         /// <summary>
         /// .NET Configuration Service
         /// </summary>
@@ -19,6 +31,31 @@ namespace PDFGenerator
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
+        }
+
+        /// <summary>
+        /// Create Swashbuckle API Info for API Explorer Description
+        /// </summary>
+        /// <param name="description">The API Explorer Description for the API</param>
+        /// <returns></returns>
+        public static Info CreateInfoForApiVersion(ApiVersionDescription description)
+        {
+            var info = new Info()
+            {
+                Title = $"PDFGenerator {description.ApiVersion}",
+                Version = description.ApiVersion.ToString(),
+                Description = "Vant4gePoint PDFGenerator microservice documentation.",
+                Contact = new Contact() { Name = "Vant4ge Engineering", Email = "dev@vant4ge.com" },
+                TermsOfService = "Proprietary",
+                License = new License() { Name = "MIT", Url = "https://opensource.org/licenses/MIT" }
+            };
+
+            if (description.IsDeprecated)
+            {
+                info.Description += Environment.NewLine + "*** This API version has been deprecated ***";
+            }
+
+            return info;
         }
 
         /// <summary>
