@@ -1,4 +1,5 @@
-﻿using DinkToPdf;
+﻿using System.Text;
+using DinkToPdf;
 using DinkToPdf.Contracts;
 using PDFGenerator.DTOs;
 using PDFGenerator.Services.Interfaces;
@@ -22,7 +23,7 @@ namespace PDFGenerator.Services
         }
 
         ///<inheritdoc />
-        public byte[] ConvertUrlToHtmlToPdfDocument(UrlDTO url)
+        public byte[] ConvertUrlToPdf(UrlDTO url)
         {
             var globalSettings = new GlobalSettings
             {
@@ -45,12 +46,38 @@ namespace PDFGenerator.Services
             return CreatePdf(globalSettings, objectSettings);
         }
 
+        ///<inheritdoc />
+        public byte[] ConvertHtmlToPdf(HTMLToPDFDTO document)
+        {
+            var globalSettings = CreateGlobalSettings(document);
+
+            var objectSettings = CreateObjectSettings(document);
+
+            var pdf = CreatePdf(globalSettings, objectSettings);
+
+            return pdf;
+        }
+        
+        ///<inheritdoc />
+        public byte[] ConvertTemplateToPdf(TemplateToPDFDTO document)
+        {
+            CreateHtmlFromTemplate(document);
+
+            var globalSettings = CreateGlobalSettings(document);
+
+            var objectSettings = CreateObjectSettings(document);
+
+            var pdf = CreatePdf(globalSettings, objectSettings);
+
+            return pdf;
+        }
+
         /// <summary>
         /// Create the PDF from global and object settings
         /// </summary>
         /// <param name="globalSettings">Global Settings</param>
         /// <param name="objectSettings">Object Settings</param>
-        /// <returns></returns>
+        /// <returns>PDF document</returns>
         private byte[] CreatePdf(GlobalSettings globalSettings, ObjectSettings objectSettings)
         {
             var document = new HtmlToPdfDocument()
@@ -61,6 +88,93 @@ namespace PDFGenerator.Services
 
             var pdf = Converter.Convert(document);
             return pdf;
+        }
+
+        /// <summary>
+        /// Create the global settings
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        private GlobalSettings CreateGlobalSettings(HTMLToPDFDTO document)
+        {
+            var bottom = document.GlobalSettings.MarginBottom ?? 0.0;
+            var left = document.GlobalSettings.MarginLeft ?? 0.0;
+            var right = document.GlobalSettings.MarginRight ?? 0.0;
+            var top = document.GlobalSettings.MarginTop ?? 0.0;
+
+            var globalSettings = new GlobalSettings()
+            {
+                ColorMode = ColorMode.Color,
+                Copies = document.GlobalSettings.Copies ?? 1,
+                DocumentTitle = document.GlobalSettings.DocumentTitle ?? "",
+                Margins = new MarginSettings(top, right, bottom, left),
+                Orientation =
+                    document.GlobalSettings.PortraitOrientation ? Orientation.Portrait : Orientation.Landscape,
+                PaperSize = PaperKind.A4
+            };
+
+            return globalSettings;
+        }
+
+        /// <summary>
+        /// Create the object settings
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns>Object settings</returns>
+        private ObjectSettings CreateObjectSettings(HTMLToPDFDTO document)
+        {
+            var web = document.DocumentSettings.WebSettings ?? new WebSettingsDTO()
+                          {DefaultEncoding = "utf-8", EnableJavascript = true};
+
+            var header = document.DocumentSettings.HeaderSettings ?? new HeaderSettingsDTO()
+            {
+                Center = "", 
+                FontName = "Arial", 
+                FontSize = 12, 
+                Left = "", 
+                Line = false, 
+                Right = "", 
+                Spacing = 0.0
+            };
+
+            var footer = document.DocumentSettings.FooterSettings ?? new FooterSettingsDTO()
+            {
+                Center = "",
+                FontName = "Arial",
+                FontSize = 12,
+                Left = "",
+                Line = false,
+                Right = "",
+                Spacing = 0.0
+            };
+
+            var objectSettings = new ObjectSettings()
+            {
+                PagesCount = document.DocumentSettings.PagesCount ?? false,
+                HtmlContent = document.HtmlContent,
+                WebSettings = {DefaultEncoding = web.DefaultEncoding, EnableJavascript = web.EnableJavascript},
+                HeaderSettings = {Center = header.Center ?? "", FontName = header.FontName ?? "Arial", FontSize = header.FontSize ?? 12, Left = header.Left ?? "", Line = header.Line ?? false, Right = header.Right ?? "", Spacing = header.Spacing ?? 0.0},
+                FooterSettings = {Center = footer.Center ?? "", FontName = footer.FontName ?? "Arial", FontSize = footer.FontSize ?? 12, Left = footer.Left ?? "", Line = footer.Line ?? false, Right = footer.Right ?? "", Spacing = footer.Spacing ?? 0.0}
+            };
+
+            return objectSettings;
+        }
+
+        /// <summary>
+        /// Replace all of the template entries with the actual values to create the dynamic HTML document
+        /// </summary>
+        /// <param name="document"></param>
+        private void CreateHtmlFromTemplate(TemplateToPDFDTO document)
+        {
+            var html = new StringBuilder(document.HtmlContent);
+
+            foreach (var item in document.Values)
+            {
+                var placeholder = "{{" + item.Key + "}}";
+                html.Replace(placeholder, item.Value);
+            }
+
+            document.HtmlContent = html.ToString();
         }
     }
 }
