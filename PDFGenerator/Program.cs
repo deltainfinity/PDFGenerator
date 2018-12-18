@@ -5,6 +5,9 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PDFGenerator.Configuration;
+using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace PDFGenerator
@@ -14,6 +17,8 @@ namespace PDFGenerator
     /// </summary>
     public class Program
     {
+        private static readonly ILogger Logger = Log.ForContext<Program>();
+
         /// <summary>
         /// Working directory the application launched from
         /// </summary>
@@ -30,7 +35,15 @@ namespace PDFGenerator
 
         public static void Main(string[] args)
         {
+            var serviceCollection = new ServiceCollection();
+
+            SerilogConfig.Configure(serviceCollection, Configuration);
+
+            Log.Information("Starting web host");
+
             CreateWebHostBuilder(args).Build().Run();
+
+            Logger.Debug("Startup -> Program Main: COMPLETE");
         }
 
         /// <summary>
@@ -67,6 +80,7 @@ namespace PDFGenerator
             .UseKestrel()
             .UseIISIntegration()
             .UseConfiguration(Configuration)
-            .UseStartup<Startup>();
+            .UseStartup<Startup>()
+            .UseSerilog();
     }
 }

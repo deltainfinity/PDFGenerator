@@ -12,6 +12,7 @@ using PDFGenerator.Configuration;
 using PDFGenerator.Services;
 using PDFGenerator.Services.Interfaces;
 using PDFGenerator.Utilities;
+using Serilog;
 
 namespace PDFGenerator
 {
@@ -20,6 +21,8 @@ namespace PDFGenerator
     /// </summary>
     public class Startup
     {
+        private static readonly ILogger Logger = Log.ForContext<Startup>();
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -86,7 +89,8 @@ namespace PDFGenerator
             var context = new CustomAssemblyLoadContext();
             context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
             services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
-            
+
+            Logger.Debug("Startup -> Configure AspNetCore Services: COMPLETE");
         }
 
         /// <summary>
@@ -128,6 +132,8 @@ namespace PDFGenerator
 
             app.UseStaticFiles();
             app.UseMvc();
+
+            Logger.Debug("Startup -> Configure AspNetCore Services: COMPLETE");
         }
     }
 }
