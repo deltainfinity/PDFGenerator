@@ -10,6 +10,9 @@ namespace PDFGenerator.Controllers.Base
     [Route("v{version:apiVersion}/[controller]")]
     public class BaseApiController : ControllerBase
     {
+        /// <summary>
+        /// Memory cache
+        /// </summary>
         protected IMemoryCache Cache { get; set; }
 
         /// <summary>

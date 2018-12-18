@@ -3,6 +3,9 @@ using PDFGenerator.DTOs;
 
 namespace PDFGenerator.Services.Interfaces
 {
+    /// <summary>
+    /// Interface for PDF creation services
+    /// </summary>
     public interface IPdfService
     {
         /// <summary>

@@ -33,17 +33,19 @@ namespace PDFGenerator
             .AddEnvironmentVariables()
             .Build();
 
+        /// <summary>
+        /// Main entry point for the application
+        /// </summary>
+        /// <param name="args">Nope</param>
         public static void Main(string[] args)
         {
             var serviceCollection = new ServiceCollection();
 
             SerilogConfig.Configure(serviceCollection, Configuration);
 
-            Log.Information("Starting web host");
+            Logger.Information("Starting web host");
 
             CreateWebHostBuilder(args).Build().Run();
-
-            Logger.Debug("Startup -> Program Main: COMPLETE");
         }
 
         /// <summary>

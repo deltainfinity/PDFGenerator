@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PDFGenerator.Controllers.Base;
 using PDFGenerator.DTOs;
 using PDFGenerator.Services.Interfaces;
+using Serilog;
 
 namespace PDFGenerator.Controllers.V1
 {
@@ -13,6 +14,7 @@ namespace PDFGenerator.Controllers.V1
     [ApiVersion("1.0")]
     public class PDFGeneratorController : BaseApiController
     {
+        private readonly ILogger Logger = Log.ForContext<PDFGeneratorController>();
         private IPdfService PdfService { get; set; }
         private IMemoryCache MemoryCache { get; set; }
 
@@ -47,8 +49,32 @@ namespace PDFGenerator.Controllers.V1
             }
             catch (Exception e)
             {
-                //Logger.Error(e, $"Error creating PDF from URL: {e.Message}");
+                Logger.Error(e, $"Error creating PDF from URL: {e.Message}");
                 return StatusCode(500, $"Error creating PDF from URL: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Load test endpoint to be used by Azure DevOps to test maximum concurrent users
+        /// </summary>
+        /// <returns>A PDF of the google.com web page</returns>
+        [HttpGet]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Route("LoadTest")]
+        public ActionResult CreatePdfFromUrlLoadTest()
+        {
+            try
+            {
+                var pdf = PdfService.ConvertUrlToHtmlToPdfDocument(new UrlDTO(){Url = "https://www.google.com"});
+ 
+                return File(pdf, "application/pdf");
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, $"Error creating PDF from google.com URL in load test endpoint: {e.Message}");
+                return StatusCode(500, $"Error creating PDF from google.com URL in load test endpoint: {e.Message}");
             }
         }
     }
