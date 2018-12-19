@@ -33,13 +33,13 @@ namespace PDFGenerator.Controllers.V1
         /// Create a PDF document from an HTML string and a set of properties
         /// </summary>
         /// <param name="document">The document containing the HTML and the properties</param>
-        /// <returns>PDF</returns>
+        /// <returns>byte[] containing the generated PDF</returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [Route("PDFFromHTML")]
-        public ActionResult CreatePdfFromHtml([FromBody] HTMLToPDFDTO document)
+        public ActionResult<byte[]> CreatePdfFromHtml([FromBody] HTMLToPDFDTO document)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace PDFGenerator.Controllers.V1
 
                 var pdf = PdfService.ConvertHtmlToPdf(document);
 
-                return File(pdf, "application/pdf");
+                return Ok(pdf);
             }
             catch (Exception e)
             {
@@ -63,13 +63,13 @@ namespace PDFGenerator.Controllers.V1
         /// Create a PDF from a URL
         /// </summary>
         /// <param name="page">The URL of the page</param>
-        /// <returns>A PDF of the HTML page located at the URL</returns>
+        /// <returns>byte[] containing a PDF of the HTML page located at the URL</returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [Route("PDFFromURL")]
-        public ActionResult CreatePdfFromUrl([FromBody]UrlDTO page)
+        public ActionResult<byte[]> CreatePdfFromUrl([FromBody]UrlDTO page)
         {
             if (!ModelState.IsValid)
             {
@@ -79,8 +79,8 @@ namespace PDFGenerator.Controllers.V1
             try
             {
                 var pdf = PdfService.ConvertUrlToPdf(page);
- 
-                return File(pdf, "application/pdf");
+
+                return Ok(pdf);
             }
             catch (Exception e)
             {
@@ -93,13 +93,13 @@ namespace PDFGenerator.Controllers.V1
         /// Create a PDF from an HTML template and a set of values
         /// </summary>
         /// <param name="document">HTML template and dictionary of replacement values along with PDF properties</param>
-        /// <returns>PDF document</returns>
+        /// <returns>byte[] containing PDF document</returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [Route("PDFFromTemplate")]
-        public ActionResult CreatePdfFromTemplate([FromBody] TemplateToPDFDTO document)
+        public ActionResult<byte[]> CreatePdfFromTemplate([FromBody] TemplateToPDFDTO document)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace PDFGenerator.Controllers.V1
 
                 var pdf = PdfService.ConvertTemplateToPdf(document);
 
-                return File(pdf, "application/pdf");
+                return Ok(pdf);
             }
             catch (Exception e)
             {
@@ -128,13 +128,13 @@ namespace PDFGenerator.Controllers.V1
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         [Route("LoadTest")]
-        public ActionResult CreatePdfFromUrlLoadTest()
+        public ActionResult<byte[]> CreatePdfFromUrlLoadTest()
         {
             try
             {
                 var pdf = PdfService.ConvertUrlToPdf(new UrlDTO(){Url = "https://www.google.com"});
  
-                return File(pdf, "application/pdf");
+                return Ok(pdf);
             }
             catch (Exception e)
             {

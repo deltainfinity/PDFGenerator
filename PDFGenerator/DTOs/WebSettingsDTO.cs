@@ -17,6 +17,5 @@
         /// </summary>
         public bool? EnableJavascript { get; set; }
 
-
     }
 }

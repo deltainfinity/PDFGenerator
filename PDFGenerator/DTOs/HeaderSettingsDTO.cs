@@ -61,5 +61,12 @@
         /// Null = default
         /// </summary>
         public double? Spacing { get; set; }
+
+        /// <summary>
+        /// Url for a HTML document to use for the footer. Default = ""
+        /// Null = default
+        /// If you specify this value then any values in Left, Right, and Center will be disregarded
+        /// </summary>
+        public string HtmlUrl { get; set; }
     }
 }

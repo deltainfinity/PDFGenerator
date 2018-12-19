@@ -133,9 +133,17 @@ namespace PDFGenerator.Services
                 FontSize = 12, 
                 Left = "", 
                 Line = false, 
-                Right = "", 
+                Right = "",
+                HtmlUrl = "",
                 Spacing = 0.0
             };
+
+            if (header.HtmlUrl.Length > 0)
+            {
+                header.Center = "";
+                header.Left = "";
+                header.Right = "";
+            }
 
             var footer = document.DocumentSettings.FooterSettings ?? new FooterSettingsDTO()
             {
@@ -145,16 +153,24 @@ namespace PDFGenerator.Services
                 Left = "",
                 Line = false,
                 Right = "",
+                HtmlUrl = "",
                 Spacing = 0.0
             };
+
+            if (footer.HtmlUrl.Length > 0)
+            {
+                footer.Center = "";
+                footer.Left = "";
+                footer.Right = "";
+            }
 
             var objectSettings = new ObjectSettings()
             {
                 PagesCount = document.DocumentSettings.PagesCount ?? false,
                 HtmlContent = document.HtmlContent,
                 WebSettings = {DefaultEncoding = web.DefaultEncoding, EnableJavascript = web.EnableJavascript},
-                HeaderSettings = {Center = header.Center ?? "", FontName = header.FontName ?? "Arial", FontSize = header.FontSize ?? 12, Left = header.Left ?? "", Line = header.Line ?? false, Right = header.Right ?? "", Spacing = header.Spacing ?? 0.0},
-                FooterSettings = {Center = footer.Center ?? "", FontName = footer.FontName ?? "Arial", FontSize = footer.FontSize ?? 12, Left = footer.Left ?? "", Line = footer.Line ?? false, Right = footer.Right ?? "", Spacing = footer.Spacing ?? 0.0}
+                HeaderSettings = {Center = header.Center ?? "", FontName = header.FontName ?? "Arial", FontSize = header.FontSize ?? 12, Left = header.Left ?? "", Line = header.Line ?? false, Right = header.Right ?? "", Spacing = header.Spacing ?? 0.0, HtmUrl = header.HtmlUrl ?? ""},
+                FooterSettings = {Center = footer.Center ?? "", FontName = footer.FontName ?? "Arial", FontSize = footer.FontSize ?? 12, Left = footer.Left ?? "", Line = footer.Line ?? false, Right = footer.Right ?? "", Spacing = footer.Spacing ?? 0.0, HtmUrl = header.HtmlUrl ?? ""}
             };
 
             return objectSettings;
